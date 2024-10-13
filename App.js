@@ -1,21 +1,21 @@
-import { StyleSheet, Text, View, TextInput, Button, FlatList } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Productlist from './Productlist';
 import { SQLiteProvider } from 'expo-sqlite';
-import Productlist from './Productlist';
+
 
 
 export default function App() {
 
   const initialize = async (db) => {
     db.execAsync(`
-      CREATE TABLE IF NOT EXISTS product (id INT PRIMARY KEY NOT NULL, product TEXT, amount TEXT);
+      CREATE TABLE IF NOT EXISTS product (id INT PRIMARY KEY NOT NULL, product TEXT, amount TEXT); 
     `);
-  };
+  }; //id on int, product text ja amount text
 
   return (
     <SQLiteProvider
       databaseName='productdb.db'
-      onInit={initialize}
+      onInit={initialize} //funktio varmistaa, että tietokanta on valmis käytettäväksi heti kun sovellus käynnistyy
       onError={error => console.error('Could not open database', error)}
     >
       <Productlist />
