@@ -3,31 +3,33 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 
 export default function Productlist() {
-
-  const [product, setProduct] = useState('');
   const [amount, setAmount] = useState('');
+  const [product, setProduct] = useState('');
+  const [products, setProducts] = useState([]);
 
-  const db = useSQLiteContext(); //hook, joka tarjoaa pääsyn SQLite-tietokannan kontekstiin
+  const db = useSQLiteContext();
 
-  const saveItem = async () => { //lisätään tuotteet tietokantaan
+  const saveItem = async () => {
     try {
       await db.runAsync('INSERT INTO product (product, amount) VALUES (?, ?)', [product, amount]);
       await updateList();
+      console.log("Item saved, updating list.");
     } catch (error) {
       console.error('Could not add item', error);
     }
   };
 
-  const updateList = async () => { //näyttää tietokannassa olevat tuotteet
+  const updateList = async () => {
     try {
       const list = await db.getAllAsync('SELECT * FROM product');
-      setProduct(list);
+      console.log('Fetched items:', list);
+      setProducts(list);
     } catch (error) {
       console.error('Could not get items', error);
     }
   };
 
-  const deleteItem = async (id) => { //tämän avulla poistetaan tuotteet tietokannasta
+  const deleteItem = async (id) => {
     try {
       await db.runAsync('DELETE FROM product WHERE id = ?', [id]);
       await updateList();
@@ -36,7 +38,7 @@ export default function Productlist() {
     }
   };
 
-  useEffect(() => { //varmistaa, että kun komponentti ladataan, updateList-funktio suoritetaan, ja ostoslista päivitetään tietokannan tiedoilla.
+  useEffect(() => {
     updateList();
   }, []);
 
@@ -52,17 +54,18 @@ export default function Productlist() {
         onChangeText={text => setAmount(text)}
         value={amount} 
       /> 
-      <Button onPress={saveItem} title="bought" />
+      <Button onPress={saveItem} title="save" />
+      <Text>Shopping list</Text>
       <FlatList
-        keyExtractor={item => item.id.toString()} //funktio, joka ottaa vastaan jokaisen listan kohteen ja palauttaa sen ainutlaatuisen avaimen.
-        renderItem={({ item }) => ( //funktio, joka määrittelee, miltä jokainen lista-elementti näyttää.
+        keyExtractor={item => item.id.toString()} 
+        renderItem={({ item }) => (
           <View style={styles.itemContainer}> 
-            <Text>{item.product}</Text> 
-            <Text>{item.amount}</Text>
-            <Text style={{ color: '#0000ff' }} onPress={() => deleteItem(item.id)}>done</Text>
-          </View> //ylläoleva näyttää tuotteen nimen ja määrän mitkä on tallennettu listalle
+            <Text>{item.product}, </Text> 
+            <Text>{item.amount}, </Text>
+            <Text style={{ color: '#0000ff' }} onPress={() => deleteItem(item.id)}>bought</Text>
+          </View>
         )}
-        data={product} //määrittää, mistä tiedoista lista rakennetaan. . product on tila, joka sisältää kaikki tuotteet, jotka on haettu tietokannasta. Tämä on se data, jota FlatList käyttää näyttääkseen jokaisen ostoksen listassa.
+        data={products} 
       />
     </View>
   );
@@ -74,11 +77,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: 50,
+  
   },
   itemContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     width: '100%',
     padding: 10,
   },
