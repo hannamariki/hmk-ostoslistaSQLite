@@ -1,6 +1,11 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Productlist from './Productlist';
 import { SQLiteProvider } from 'expo-sqlite';
+import { PaperProvider, Appbar } from 'react-native-paper';
+import { StatusBar } from 'expo-status-bar';
+
+
+
 
 export default function App() {
   const initialize = async (db) => {
@@ -15,6 +20,11 @@ export default function App() {
   }; //Autoincrement asettaa juoksevan numerosarjan
 
   return (
+    
+    <PaperProvider>
+    <Appbar mode="medium" elevated>
+      <Appbar.Content title="Shopping list" style={styles.container} />
+    </Appbar>
     <SQLiteProvider
       databaseName='productdb.db'
       onInit={initialize}
@@ -22,6 +32,9 @@ export default function App() {
     >
       <Productlist />
     </SQLiteProvider>
+    <StatusBar style="auto" />
+  </PaperProvider>
+
   );
 }
 
